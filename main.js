@@ -330,7 +330,7 @@ function clearStaging(){
   const clearMessage = new g.Label({
     scene: scene,
     font: font,
-    text: "Complete!!",
+    text: "Complete!!!",
     fontSize: 50,
     textColor: "white",
     x: g.game.width / 2,
