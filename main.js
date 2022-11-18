@@ -1,5 +1,7 @@
 const scene = new g.Scene({ game: g.game });
+
 let count = 4;
+
 const font = new g.DynamicFont({
   game: g.game,
   fontFamily: "sans-serif",
@@ -14,6 +16,7 @@ const counter = new g.Label({
   textColor: "white",
   x: 15,
   y: 70,
+  anchorY: 0.5,
 });
 
 function main() {
@@ -60,13 +63,13 @@ function main() {
     const back = new g.FilledRect({
       scene: scene,
       cssColor: "black",
-      width: 430,
+      width: 450,
       height: 100,
       x: 10,
       y: 15,
     });
 
-    const label = new g.Label({
+    const mission = new g.Label({
       scene: scene,
       font: font,
       text: "Catch all the " + targetColor + " insects!!",
@@ -74,13 +77,20 @@ function main() {
       textColor: "white",
       x: 15,
       y: 20,
+      anchorY: 0.3,
     });
 
     scene.append(back);
-    scene.append(label);
+    back.append(mission);
+    back.append(counter);
 
-    scene.append(counter);
-
+    back.onUpdate.add(() => {
+      if(count == 0){
+        back.destroy();
+        clearStaging();
+      }
+    });
+    
   });
   g.game.pushScene(scene);
 
@@ -230,8 +240,8 @@ function createInsect(scene, colorIdx, sizeIdx, hornSizeIdx, target) {
 }
 
 function moveInsect(insect, flg, LorR){
-  if(flg == false){
-    let random = Math.floor(g.game.random.generate() * 60);
+  if(flg == false && insect.x > 0 && insect.x < g.game.width && insect.y > 0 && insect.y < g.game.height){
+    let random = Math.floor(g.game.random.generate() * 100);
 
     if(random == 0){
       LorR = Math.floor(g.game.random.generate() * 2);
@@ -240,9 +250,18 @@ function moveInsect(insect, flg, LorR){
   }
 
   if(flg == true && LorR == 0){
+    if(insect.angle == 0){
+      insect.angle = 360;
+    }
     insect.angle -= 2;
   } else if(flg == true && LorR == 1){
     insect.angle += 2;
+  }
+
+
+
+  if(insect.angle == 360){
+    insect.angle = 0;
   }
 
   if(insect.angle == 0){
@@ -266,7 +285,11 @@ function moveInsect(insect, flg, LorR){
   }
 
   if(insect.x <= 0 || insect.x >= g.game.width || insect.y <= 0 || insect.y >= g.game.height){
-    insect.angle -= 180;
+    if(insect.angle == 0 || insect.angle == 90){
+      insect.angle += 180;
+    }else if(insect.angle == 180 || insect.angle == 270){
+      insect.angle -= 180;
+    }
   }
 
   insect.modified();
@@ -290,8 +313,34 @@ function missIndicate(scene, x, y){
   }, 1000);
 
   scene.append(miss);
+}
 
+function clearStaging(){
+  const back = new g.FilledRect({
+    scene: scene,
+    cssColor: "black",
+    width: 450,
+    height: 100,
+    x: g.game.width / 2,
+    y: g.game.height / 2,
+    anchorX: 0.5,
+    anchorY: 0.5,
+  });
 
+  const clearMessage = new g.Label({
+    scene: scene,
+    font: font,
+    text: "Complete!!",
+    fontSize: 50,
+    textColor: "white",
+    x: g.game.width / 2,
+    y: g.game.height / 2,
+    anchorX: 0.5,
+    anchorY: 0.5,
+  });
+
+  scene.append(back);
+  scene.append(clearMessage);
 }
 
 module.exports = main;
