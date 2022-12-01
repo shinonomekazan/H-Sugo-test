@@ -1,12 +1,28 @@
 const scene = new g.Scene({ game: g.game });
 
-let count = 4;
-
 const font = new g.DynamicFont({
   game: g.game,
   fontFamily: "sans-serif",
   size: 30
 });
+
+let target = Math.floor(g.game.random.generate() * 4);
+const colorOfConvenience = ["blue", "yellow", "red", "glay"];
+let targetColor;
+targetColor = colorOfConvenience[target];
+
+const mission = new g.Label({
+  scene: scene,
+  font: font,
+  text: "Catch any " + targetColor + " insect!!",
+  fontSize: 30,
+  textColor: "white",
+  x: 15,
+  y: 20,
+  anchorY: 0.3,
+});
+
+let count = 4;
 
 const counter = new g.Label({
   scene: scene,
@@ -30,26 +46,10 @@ function main() {
 
     scene.append(ground);
 
-    let target = Math.floor(g.game.random.generate() * 4);
-    let targetColor;
-
-    if(target == 0){
-      targetColor = "blue";
-    } else if(target == 1){
-      targetColor = "yellow"
-    } else if(target == 2){
-      targetColor = "red"
-    } else if(target == 3){
-      targetColor = "glay"
-    }
-
-    let insects = [];
-
     for(let colorIdx = 0; colorIdx < 4; colorIdx++){
       for(let sizeIdx = 0; sizeIdx < 2; sizeIdx++){
         for(let hornSizeIdx = 0; hornSizeIdx < 2; hornSizeIdx++){
-          const insect = createInsect(scene, colorIdx, sizeIdx, hornSizeIdx, target);
-          insects.push(insect);
+          const insect = createInsect(scene, colorIdx, sizeIdx, hornSizeIdx);
           scene.append(insect);
         } 
       }
@@ -67,17 +67,6 @@ function main() {
       height: 100,
       x: 10,
       y: 15,
-    });
-
-    const mission = new g.Label({
-      scene: scene,
-      font: font,
-      text: "Catch all the " + targetColor + " insects!!",
-      fontSize: 30,
-      textColor: "white",
-      x: 15,
-      y: 20,
-      anchorY: 0.3,
     });
 
     scene.append(back);
@@ -129,7 +118,7 @@ function createGrass(scene){
   return grassFrame;
 }
 
-function createInsect(scene, colorIdx, sizeIdx, hornSizeIdx, target) {
+function createInsect(scene, colorIdx, sizeIdx, hornSizeIdx) {
   const direction = [0, 90, 180, 270];
   const directionIdx = Math.floor(g.game.random.generate() * direction.length);
   const leg1X = Math.floor(g.game.random.generate() * g.game.width);
@@ -223,18 +212,20 @@ function createInsect(scene, colorIdx, sizeIdx, hornSizeIdx, target) {
 
   body.touchable = true;
 
-  if(colorIdx == target){
-    body.onPointDown.add(() => {
+  body.onPointDown.add(() => {
+    if(colorIdx == target){
       count--;
       counter.text = "Target remaining : " + count;
       counter.invalidate();
       leg1.destroy();
-    });
-  } else if(colorIdx != target){
-    body.onPointDown.add(() => {
+      target = Math.floor(g.game.random.generate() * 4);
+      targetColor = colorOfConvenience[target];
+      mission.text = "Catch any " + targetColor + " insect!!";
+      mission.invalidate();
+    }else if(colorIdx != target){
       missIndicate(scene, leg1.x, leg1.y);
-    });
-  }
+    } 
+  });
 
   return leg1;
 }
@@ -330,7 +321,7 @@ function clearStaging(){
   const clearMessage = new g.Label({
     scene: scene,
     font: font,
-    text: "Complete!!",
+    text: "Complete!!!",
     fontSize: 50,
     textColor: "white",
     x: g.game.width / 2,
