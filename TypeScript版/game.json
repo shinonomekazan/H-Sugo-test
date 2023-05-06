@@ -9,9 +9,9 @@
 			"path": "script/main.js",
 			"global": true
 		},
-		"system": {
+		"systems": {
 			"type": "script",
-			"path": "script/system.js",
+			"path": "script/systems.js",
 			"global": true
 		}
 	},
