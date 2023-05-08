@@ -1,6 +1,6 @@
 import { FilledRect, Scene } from "@akashic/akashic-engine";
 
-export const scene = new g.Scene({ game: g.game });
+export const scene = new g.Scene({ game: g.game, assetIds: ['touch']});
 
 export const ground = new g.FilledRect({
 	scene: scene,
@@ -155,6 +155,7 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	body.touchable = true;
 
 	body.onPointDown.add(() => {
+		(scene.assets['touch'] as g.AudioAsset).play();
 		if (colorIndex === targetIndex) {
 			updateStatus(leg1);
 		} else if (colorIndex !== targetIndex) {
@@ -216,8 +217,6 @@ function moveInsect(insect: FilledRect, isRotating: boolean, leftRight: number):
 	} else if (isRotating === true && leftRight === 1) {
 		insect.angle += 2;
 	}
-
-
 
 	if (insect.angle === 360) {
 		insect.angle = 0;
