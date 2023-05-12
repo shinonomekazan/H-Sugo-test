@@ -13,6 +13,18 @@
 			"type": "script",
 			"path": "script/systems.js",
 			"global": true
+		},
+		"touch": {
+			"type": "audio",
+			"path": "audio/touch",
+			"systemId": "sound",
+			"duration": 413,
+			"hint": {
+				"extensions": [
+					".aac",
+					".ogg"
+				]
+			}
 		}
 	},
 	"moduleMainScripts": {},
