@@ -1,6 +1,9 @@
+import { Timeline } from "@akashic-extension/akashic-timeline";
 import { FilledRect, Scene } from "@akashic/akashic-engine";
+import * as tl from "@akashic-extension/akashic-timeline";
 
-export const scene = new g.Scene({ game: g.game, assetIds: ['touch']});
+
+export const scene = new g.Scene({ game: g.game, assetIds: ['bgm', '成功', '失敗'] });
 
 export const ground = new g.FilledRect({
 	scene: scene,
@@ -8,6 +11,12 @@ export const ground = new g.FilledRect({
 	height: g.game.height,
 	cssColor: "wheat"
 });
+
+export function bgmConfig(): void {
+	const bgm = scene.assets['bgm'] as g.AudioAsset;
+	const player = bgm.play();
+	player.changeVolume(0.7);
+}
 
 const font = new g.DynamicFont({
 	game: g.game,
@@ -60,7 +69,7 @@ export function statusDisplay(): FilledRect {
 	return textWindow;
 }
 
-export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: number, hornSizeIndex: number): void {
+export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: number, hornSizeIndex: number): FilledRect {
 	const direction = [0, 90, 180, 270];
 	const directionIndex = Math.floor(g.game.random.generate() * direction.length);
 	const leg1X = Math.floor(g.game.random.generate() * g.game.width);
@@ -155,15 +164,42 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	body.touchable = true;
 
 	body.onPointDown.add(() => {
-		(scene.assets['touch'] as g.AudioAsset).play();
 		if (colorIndex === targetIndex) {
+			(scene.assets['成功'] as g.AudioAsset).play();
 			updateStatus(leg1);
 		} else if (colorIndex !== targetIndex) {
+			(scene.assets['失敗'] as g.AudioAsset).play();
 			missIndicate(scene, leg1.x, leg1.y);
 		}
 	});
 
-	scene.append(leg1);;
+	return leg1;
+}
+
+export function numberingInsects(): FilledRect[] {
+	let insects: FilledRect[] = new Array(15);
+	let numberingCounter = 0
+
+	for (let colorIdx = 0; colorIdx < 4; colorIdx++) {
+		for (let sizeIdx = 0; sizeIdx < 2; sizeIdx++) {
+			for (let hornSizeIdx = 0; hornSizeIdx < 2; hornSizeIdx++) {
+				insects[numberingCounter] = createInsect(scene, colorIdx, sizeIdx, hornSizeIdx);
+				scene.append(insects[numberingCounter]);
+				numberingCounter++;
+			}
+		}
+	}
+
+	return insects;
+}
+
+export function setGoal(insects: FilledRect[], arrayLength: number): void {
+	const targetNumber = Math.floor(g.game.random.generate() * arrayLength);
+	insects[targetNumber].onUpdate.removeAll;
+
+	const timeline = new tl.Timeline(scene);
+	const theGoal = timeline.create(insects[targetNumber])
+	theGoal.moveTo(scene.game.width - 100, 100, 3000);
 }
 
 export function createGrass(): void {

@@ -1,19 +1,15 @@
+import { FilledRect } from "@akashic/akashic-engine";
 import * as system from "./systems";
 
 function main(): void{
 	system.scene.onLoad.add(() => {
+		system.bgmConfig();
 
 		// 地面生成
 		system.scene.append(system.ground);
 
 		// 虫生成
-		for (let colorIdx = 0; colorIdx < 4; colorIdx++) {
-			for (let sizeIdx = 0; sizeIdx < 2; sizeIdx++) {
-				for (let hornSizeIdx = 0; hornSizeIdx < 2; hornSizeIdx++) {
-					system.createInsect(system.scene, colorIdx, sizeIdx, hornSizeIdx);
-				}
-			}
-		}
+		const insects = system.numberingInsects();
 
 		// 草生成
 		for (let i = 0; i < 7; i++) {
@@ -22,6 +18,8 @@ function main(): void{
 
 		// ステータス表示
 		system.statusDisplay();
+
+		system.setGoal(insects, insects.length);
 
 	});
 

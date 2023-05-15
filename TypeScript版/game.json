@@ -14,11 +14,35 @@
 			"path": "script/systems.js",
 			"global": true
 		},
-		"touch": {
+		"bgm": {
 			"type": "audio",
-			"path": "audio/touch",
+			"path": "audio/bgm",
+			"systemId": "music",
+			"duration": 166906,
+			"hint": {
+				"extensions": [
+					".aac",
+					".ogg"
+				]
+			}
+		},
+		"失敗": {
+			"type": "audio",
+			"path": "audio/失敗",
 			"systemId": "sound",
-			"duration": 413,
+			"duration": 1025,
+			"hint": {
+				"extensions": [
+					".aac",
+					".ogg"
+				]
+			}
+		},
+		"成功": {
+			"type": "audio",
+			"path": "audio/成功",
+			"systemId": "sound",
+			"duration": 837,
 			"hint": {
 				"extensions": [
 					".aac",
@@ -27,9 +51,17 @@
 			}
 		}
 	},
-	"moduleMainScripts": {},
+	"moduleMainScripts": {
+		"@akashic-extension/akashic-timeline": "node_modules/@akashic-extension/akashic-timeline/lib/index.js"
+	},
 	"environment": {
 		"sandbox-runtime": "3"
 	},
-	"globalScripts": []
+	"globalScripts": [
+		"node_modules/@akashic-extension/akashic-timeline/lib/ActionType.js",
+		"node_modules/@akashic-extension/akashic-timeline/lib/Easing.js",
+		"node_modules/@akashic-extension/akashic-timeline/lib/Timeline.js",
+		"node_modules/@akashic-extension/akashic-timeline/lib/Tween.js",
+		"node_modules/@akashic-extension/akashic-timeline/lib/index.js"
+	]
 }
