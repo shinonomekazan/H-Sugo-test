@@ -157,14 +157,22 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	leg1.scaleX = bodySize[bodySizeIndex];
 	leg1.scaleY = bodySize[bodySizeIndex];
 
+	// フラグ管理に使う
+	leg1.tag = true;
+
 	leg1.onUpdate.add(() => {
+		if (leg1.tag === false) {
+			return;
+		}
 		[isRotating, leftRight] = moveInsect(leg1, isRotating, leftRight);
 	});
 
 	body.touchable = true;
 
 	body.onPointDown.add(() => {
-		if (colorIndex === targetIndex) {
+		if (leg1.tag === false) {
+			return;
+		} else if (colorIndex === targetIndex) {
 			(scene.assets['成功'] as g.AudioAsset).play();
 			updateStatus(leg1);
 		} else if (colorIndex !== targetIndex) {
@@ -195,8 +203,8 @@ export function numberingInsects(): FilledRect[] {
 
 export function setGoal(insects: FilledRect[], arrayLength: number): void {
 	const targetNumber = Math.floor(g.game.random.generate() * arrayLength);
-	insects[targetNumber].onUpdate.removeAll;
-
+	insects[targetNumber].angle = 0;
+	insects[targetNumber].tag = false;
 	const timeline = new tl.Timeline(scene);
 	const theGoal = timeline.create(insects[targetNumber])
 	theGoal.moveTo(scene.game.width - 100, 100, 3000);

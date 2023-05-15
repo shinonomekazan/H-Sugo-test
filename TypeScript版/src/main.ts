@@ -1,4 +1,3 @@
-import { FilledRect } from "@akashic/akashic-engine";
 import * as system from "./systems";
 
 function main(): void{
