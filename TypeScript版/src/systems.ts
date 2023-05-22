@@ -4,6 +4,8 @@ import * as tl from "@akashic-extension/akashic-timeline";
 export const gameScene = new g.Scene({ game: g.game, assetIds: ["bgm", "成功", "失敗"] });
 export const openingScene = new g.Scene({ game: g.game });
 
+const timeline = new tl.Timeline(gameScene);
+
 export const ground0 = new g.FilledRect({
 	scene: openingScene,
 	width: g.game.width,
@@ -91,8 +93,8 @@ export function showRules(openingScene: Scene): void {
 	const rules = new g.Label({
 		scene: openingScene,
 		font: font,
-		text: `クリックで
-ゲーム開始`,
+		text: `ゴーレムの周りに
+冷気が集まっていく……!!`,
 		fontSize: 20,
 		textColor: "white",
 		x: g.game.width / 2,
@@ -105,6 +107,24 @@ export function showRules(openingScene: Scene): void {
 	openingScene.append(rules);
 }
 
+let isTouchable = false;
+
+function swichIsTouchable() {
+	if (isTouchable === false) {
+		isTouchable = true;
+	} else if (isTouchable === true) {
+		isTouchable = false;
+	}
+}
+
+class insectRect extends g.FilledRect{
+	gene: any[] = [null, null, null];
+
+	get theGene(): any[] {
+		return this.gene;
+	  }
+}
+
 export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: number, hornSizeIndex: number): FilledRect {
 	const direction = [0, 90, 180, 270];
 	const directionIndex = Math.floor(g.game.random.generate() * direction.length);
@@ -115,7 +135,7 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	let isRotating = false;
 	let leftRight = 0;
 
-	const leg1 = new g.FilledRect({
+	const leg1 = new insectRect({
 		scene: scene,
 		x: g.game.width / 2,
 		y: 80,
@@ -197,29 +217,52 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	// フラグ管理に使う
 	leg1.tag = true;
 
+	leg1.gene = [body.cssColor, leftHorn.height, leg1.scaleX]
+
 	leg1.onUpdate.add(() => {
-		if (leg1.tag === false) {
+		if (leg1.tag !== true) {
 			return;
 		}
 		[isRotating, leftRight] = moveInsect(leg1, isRotating, leftRight);
 	});
 
-	// body.touchable = true;
+	body.touchable = true;
 
-	// body.onPointDown.add(() => {
-	// 	if (leg1.tag === false) {
-	// 		return;
-	// 	} else if (colorIndex === targetIndex) {
-	// 		(scene.assets["成功"] as g.AudioAsset).play();
-	// 		updateStatus(leg1);
-	// 	} else if (colorIndex !== targetIndex) {
-	// 		(scene.assets["失敗"] as g.AudioAsset).play();
-	// 		missIndicate(scene, leg1.x, leg1.y);
-	// 	}
-	// });
+	body.onPointDown.add(() => {
+		if (isTouchable === false) {
+			return;
+		} else {
+			leg1.tag = false;
+			const parent = timeline.create(leg1);
+			parent.moveTo(g.game.width - 100, 260, 3000)
+				.con()
+				.rotateTo(0, 3000)
+				.wait(3000);
+
+			swichIsTouchable();
+			
+			// generateChild(body.cssColor, leftHorn.height, leg1.scaleX);
+		}
+
+
+
+		// if (leg1.tag === false) {
+		// 	return;
+		// } else if (colorIndex === targetIndex) {
+		// 	(scene.assets["成功"] as g.AudioAsset).play();
+		// 	updateStatus(leg1);
+		// } else if (colorIndex !== targetIndex) {
+		// 	(scene.assets["失敗"] as g.AudioAsset).play();
+		// 	missIndicate(scene, leg1.x, leg1.y);
+		// }
+	});
 
 	return leg1;
 }
+
+// function generateChild(color: string, horn: number, scale: number) {
+// 	insects[targetNumber].get
+// }
 
 export function numberingInsects(): FilledRect[] {
 	let insects: FilledRect[] = new Array(15);
@@ -285,25 +328,30 @@ export function showDisplay(scene: Scene): void {
 	scene.append(frame3);
 }
 
+let firstParent: number;
+
 export function setGoal(insects: FilledRect[], arrayLength: number): void {
 	const targetNumber = Math.floor(g.game.random.generate() * arrayLength);
-	insects[targetNumber].angle = 0;
 	insects[targetNumber].tag = false;
-	const timeline = new tl.Timeline(gameScene);
 	const theGoal = timeline.create(insects[targetNumber]);
-	theGoal.moveTo(100, 100, 3000);
+	theGoal.moveTo(100, 100, 3000)
+		.con()
+		.rotateTo(0, 3000);
 
-	let firstParent = Math.floor(g.game.random.generate() * arrayLength);
-	if (firstParent === targetNumber) {
-		while (firstParent !== targetNumber) {
-			firstParent = Math.floor(g.game.random.generate() * arrayLength);
-		}
-	}
-	insects[firstParent].angle = 0;
+	do {
+		firstParent = Math.floor(g.game.random.generate() * arrayLength);
+	} while (firstParent === targetNumber);
+
 	insects[firstParent].tag = false;
 	const theFirst = timeline.create(insects[firstParent]);
-	theFirst.wait(3000)
-	theFirst.moveTo(g.game.width - 100, 100, 3000);
+	theFirst.wait(3000) //ほんとは止めたくない
+		.moveTo(g.game.width - 100, 100, 3000)
+		.con()
+		.rotateTo(0, 3000);
+
+	// ここにウェイト
+
+	swichIsTouchable();
 }
 
 export function createGrass(): void {
