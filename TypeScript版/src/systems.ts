@@ -1,19 +1,25 @@
-import { Timeline } from "@akashic-extension/akashic-timeline";
 import { FilledRect, Scene } from "@akashic/akashic-engine";
 import * as tl from "@akashic-extension/akashic-timeline";
 
+export const gameScene = new g.Scene({ game: g.game, assetIds: ["bgm", "成功", "失敗"] });
+export const openingScene = new g.Scene({ game: g.game });
 
-export const scene = new g.Scene({ game: g.game, assetIds: ['bgm', '成功', '失敗'] });
+export const ground0 = new g.FilledRect({
+	scene: openingScene,
+	width: g.game.width,
+	height: g.game.height,
+	cssColor: "wheat"
+});
 
-export const ground = new g.FilledRect({
-	scene: scene,
+export const ground1 = new g.FilledRect({
+	scene: gameScene,
 	width: g.game.width,
 	height: g.game.height,
 	cssColor: "wheat"
 });
 
 export function bgmConfig(): void {
-	const bgm = scene.assets['bgm'] as g.AudioAsset;
+	const bgm = gameScene.assets.bgm as g.AudioAsset;
 	const player = bgm.play();
 	player.changeVolume(0.7);
 }
@@ -29,7 +35,7 @@ const convenienceColors = ["blue", "yellow", "red", "glay"];
 let targetColor = convenienceColors[targetIndex];
 
 const textWindow = new g.FilledRect({
-	scene: scene,
+	scene: gameScene,
 	cssColor: "black",
 	width: 450,
 	height: 100,
@@ -38,7 +44,7 @@ const textWindow = new g.FilledRect({
 });
 
 const mission = new g.Label({
-	scene: scene,
+	scene: gameScene,
 	font: font,
 	text: "Catch any " + targetColor + " insect!!",
 	fontSize: 30,
@@ -51,7 +57,7 @@ const mission = new g.Label({
 let count = 4;
 
 const counter = new g.Label({
-	scene: scene,
+	scene: gameScene,
 	font: font,
 	text: "Target remaining : " + count,
 	fontSize: 30,
@@ -62,11 +68,41 @@ const counter = new g.Label({
 });
 
 export function statusDisplay(): FilledRect {
-	scene.append(textWindow);
+	gameScene.append(textWindow);
 	textWindow.append(mission);
 	textWindow.append(counter);
 
 	return textWindow;
+}
+
+export function showRules(openingScene: Scene): void {
+
+	const back = new g.FilledRect({
+		scene: openingScene,
+		cssColor: "black",
+		width: 450,
+		height: 450,
+		x: g.game.width / 2,
+		y: g.game.height / 2,
+		anchorX: 0.5,
+		anchorY: 0.5,
+	});
+
+	const rules = new g.Label({
+		scene: openingScene,
+		font: font,
+		text: `クリックで
+ゲーム開始`,
+		fontSize: 20,
+		textColor: "white",
+		x: g.game.width / 2,
+		y: g.game.height / 2,
+		anchorX: 0.5,
+		anchorY: 0.5,
+	});
+
+	openingScene.append(back);
+	openingScene.append(rules);
 }
 
 export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: number, hornSizeIndex: number): FilledRect {
@@ -87,6 +123,7 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 		height: 5,
 		cssColor: "black",
 		anchorX: 0.5,
+		anchorY: 0.5,
 	});
 
 	const leg2 = new g.FilledRect({
@@ -167,32 +204,32 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 		[isRotating, leftRight] = moveInsect(leg1, isRotating, leftRight);
 	});
 
-	body.touchable = true;
+	// body.touchable = true;
 
-	body.onPointDown.add(() => {
-		if (leg1.tag === false) {
-			return;
-		} else if (colorIndex === targetIndex) {
-			(scene.assets['成功'] as g.AudioAsset).play();
-			updateStatus(leg1);
-		} else if (colorIndex !== targetIndex) {
-			(scene.assets['失敗'] as g.AudioAsset).play();
-			missIndicate(scene, leg1.x, leg1.y);
-		}
-	});
+	// body.onPointDown.add(() => {
+	// 	if (leg1.tag === false) {
+	// 		return;
+	// 	} else if (colorIndex === targetIndex) {
+	// 		(scene.assets["成功"] as g.AudioAsset).play();
+	// 		updateStatus(leg1);
+	// 	} else if (colorIndex !== targetIndex) {
+	// 		(scene.assets["失敗"] as g.AudioAsset).play();
+	// 		missIndicate(scene, leg1.x, leg1.y);
+	// 	}
+	// });
 
 	return leg1;
 }
 
 export function numberingInsects(): FilledRect[] {
 	let insects: FilledRect[] = new Array(15);
-	let numberingCounter = 0
+	let numberingCounter = 0;
 
 	for (let colorIdx = 0; colorIdx < 4; colorIdx++) {
 		for (let sizeIdx = 0; sizeIdx < 2; sizeIdx++) {
 			for (let hornSizeIdx = 0; hornSizeIdx < 2; hornSizeIdx++) {
-				insects[numberingCounter] = createInsect(scene, colorIdx, sizeIdx, hornSizeIdx);
-				scene.append(insects[numberingCounter]);
+				insects[numberingCounter] = createInsect(gameScene, colorIdx, sizeIdx, hornSizeIdx);
+				gameScene.append(insects[numberingCounter]);
 				numberingCounter++;
 			}
 		}
@@ -201,23 +238,82 @@ export function numberingInsects(): FilledRect[] {
 	return insects;
 }
 
+export function showDisplay(scene: Scene): void {
+	const frame0 = new g.FilledRect({
+		scene: scene,
+		x: 100,
+		y: 30,
+		width: 80 * 1.3,
+		height: 100 * 1.3,
+		cssColor: "white",
+		anchorX: 0.5,
+	})
+
+	const frame1 = new g.FilledRect({
+		scene: scene,
+		x: gameScene.game.width - 100,
+		y: 30,
+		width: 80 * 1.3,
+		height: 100 * 1.3,
+		cssColor: "white",
+		anchorX: 0.5,
+	})
+
+	const frame2 = new g.FilledRect({
+		scene: scene,
+		x: gameScene.game.width - 100,
+		y: 190,
+		width: 80 * 1.3,
+		height: 100 * 1.3,
+		cssColor: "white",
+		anchorX: 0.5,
+	})
+
+	const frame3 = new g.FilledRect({
+		scene: scene,
+		x: gameScene.game.width - 100,
+		y: 350,
+		width: 80 * 1.3,
+		height: 100 * 1.3,
+		cssColor: "white",
+		anchorX: 0.5,
+	})
+
+	scene.append(frame0);
+	scene.append(frame1);
+	scene.append(frame2);
+	scene.append(frame3);
+}
+
 export function setGoal(insects: FilledRect[], arrayLength: number): void {
 	const targetNumber = Math.floor(g.game.random.generate() * arrayLength);
 	insects[targetNumber].angle = 0;
 	insects[targetNumber].tag = false;
-	const timeline = new tl.Timeline(scene);
-	const theGoal = timeline.create(insects[targetNumber])
-	theGoal.moveTo(scene.game.width - 100, 100, 3000);
+	const timeline = new tl.Timeline(gameScene);
+	const theGoal = timeline.create(insects[targetNumber]);
+	theGoal.moveTo(100, 100, 3000);
+
+	let firstParent = Math.floor(g.game.random.generate() * arrayLength);
+	if (firstParent === targetNumber) {
+		while (firstParent !== targetNumber) {
+			firstParent = Math.floor(g.game.random.generate() * arrayLength);
+		}
+	}
+	insects[firstParent].angle = 0;
+	insects[firstParent].tag = false;
+	const theFirst = timeline.create(insects[firstParent]);
+	theFirst.wait(3000)
+	theFirst.moveTo(g.game.width - 100, 100, 3000);
 }
 
 export function createGrass(): void {
 	const grassX = Math.floor(g.game.random.generate() * g.game.width);
 	const grassY = Math.floor(g.game.random.generate() * g.game.height);
 
-	const grass = new g.E({ scene: scene });
+	const grass = new g.E({ scene: gameScene });
 
 	const partA = new g.FilledRect({
-		scene: scene,
+		scene: gameScene,
 		x: grassX,
 		y: grassY,
 		width: 180,
@@ -229,7 +325,7 @@ export function createGrass(): void {
 	});
 
 	const partB = new g.FilledRect({
-		scene: scene,
+		scene: gameScene,
 		x: grassX,
 		y: grassY,
 		width: 90,
@@ -240,7 +336,7 @@ export function createGrass(): void {
 		anchorY: 0.5,
 	});
 
-	scene.append(grass);
+	gameScene.append(grass);
 }
 
 function moveInsect(insect: FilledRect, isRotating: boolean, leftRight: number): [boolean, number] {
@@ -303,7 +399,7 @@ export function clearStage(): void {
 	textWindow.destroy();
 
 	const back = new g.FilledRect({
-		scene: scene,
+		scene: gameScene,
 		cssColor: "black",
 		width: 450,
 		height: 100,
@@ -314,7 +410,7 @@ export function clearStage(): void {
 	});
 
 	const clearMessage = new g.Label({
-		scene: scene,
+		scene: gameScene,
 		font: font,
 		text: "Complete!!!",
 		fontSize: 50,
@@ -325,8 +421,8 @@ export function clearStage(): void {
 		anchorY: 0.5,
 	});
 
-	scene.append(back);
-	scene.append(clearMessage);
+	gameScene.append(back);
+	gameScene.append(clearMessage);
 }
 
 export function updateStatus(leg1: FilledRect): void {

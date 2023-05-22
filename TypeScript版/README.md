@@ -9,3 +9,6 @@
 
 # LICENSE
 <a href="https://github.com/shinonomekazan/H-Sugo-test/blob/main/LICENSE">MIT License</a>
+
+# CREDIT
+BGM : Prod by chupacabra
