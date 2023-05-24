@@ -32,50 +32,50 @@ const font = new g.DynamicFont({
 	size: 30
 });
 
-let targetIndex = Math.floor(g.game.random.generate() * 4);
-const convenienceColors = ["blue", "yellow", "red", "glay"];
-let targetColor = convenienceColors[targetIndex];
+// let targetIndex = Math.floor(g.game.random.generate() * 4);
+// const convenienceColors = ["blue", "yellow", "red", "glay"];
+// let targetColor = convenienceColors[targetIndex];
 
-const textWindow = new g.FilledRect({
-	scene: gameScene,
-	cssColor: "black",
-	width: 450,
-	height: 100,
-	x: 10,
-	y: 15,
-});
+// const textWindow = new g.FilledRect({
+// 	scene: gameScene,
+// 	cssColor: "black",
+// 	width: 450,
+// 	height: 100,
+// 	x: 10,
+// 	y: 15,
+// });
 
-const mission = new g.Label({
-	scene: gameScene,
-	font: font,
-	text: "Catch any " + targetColor + " insect!!",
-	fontSize: 30,
-	textColor: "white",
-	x: 15,
-	y: 20,
-	anchorY: 0.3,
-});
+// const mission = new g.Label({
+// 	scene: gameScene,
+// 	font: font,
+// 	text: "Catch any " + targetColor + " insect!!",
+// 	fontSize: 30,
+// 	textColor: "white",
+// 	x: 15,
+// 	y: 20,
+// 	anchorY: 0.3,
+// });
 
-let count = 4;
+// let count = 4;
 
-const counter = new g.Label({
-	scene: gameScene,
-	font: font,
-	text: "Target remaining : " + count,
-	fontSize: 30,
-	textColor: "white",
-	x: 15,
-	y: 70,
-	anchorY: 0.5,
-});
+// const counter = new g.Label({
+// 	scene: gameScene,
+// 	font: font,
+// 	text: "Target remaining : " + count,
+// 	fontSize: 30,
+// 	textColor: "white",
+// 	x: 15,
+// 	y: 70,
+// 	anchorY: 0.5,
+// });
 
-export function statusDisplay(): FilledRect {
-	gameScene.append(textWindow);
-	textWindow.append(mission);
-	textWindow.append(counter);
+// export function statusDisplay(): FilledRect {
+// 	gameScene.append(textWindow);
+// 	textWindow.append(mission);
+// 	textWindow.append(counter);
 
-	return textWindow;
-}
+// 	return textWindow;
+// }
 
 export function showRules(openingScene: Scene): void {
 
@@ -93,8 +93,7 @@ export function showRules(openingScene: Scene): void {
 	const rules = new g.Label({
 		scene: openingScene,
 		font: font,
-		text: `ゴーレムの周りに
-冷気が集まっていく……!!`,
+		text: `ゴーレムの周りに \n冷気が集まっていく……!!`,
 		fontSize: 20,
 		textColor: "white",
 		x: g.game.width / 2,
@@ -109,7 +108,7 @@ export function showRules(openingScene: Scene): void {
 
 let isTouchable = false;
 
-function swichIsTouchable() {
+const switchIsTouchable: () => void = () => {
 	if (isTouchable === false) {
 		isTouchable = true;
 	} else if (isTouchable === true) {
@@ -117,15 +116,11 @@ function swichIsTouchable() {
 	}
 }
 
-class insectRect extends g.FilledRect{
-	gene: any[] = [null, null, null];
-
-	get theGene(): any[] {
-		return this.gene;
-	  }
+class insectRect extends g.FilledRect {
+	gene: number[] = new Array(3);
 }
 
-export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: number, hornSizeIndex: number): FilledRect {
+export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: number, hornSizeIndex: number): insectRect {
 	const direction = [0, 90, 180, 270];
 	const directionIndex = Math.floor(g.game.random.generate() * direction.length);
 	const leg1X = Math.floor(g.game.random.generate() * g.game.width);
@@ -217,7 +212,7 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	// フラグ管理に使う
 	leg1.tag = true;
 
-	leg1.gene = [body.cssColor, leftHorn.height, leg1.scaleX]
+	leg1.gene = [colorIndex, hornSizeIndex, bodySizeIndex]
 
 	leg1.onUpdate.add(() => {
 		if (leg1.tag !== true) {
@@ -229,22 +224,16 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	body.touchable = true;
 
 	body.onPointDown.add(() => {
-		if (isTouchable === false) {
-			return;
-		} else {
+		if (isTouchable === true && leg1.tag === true) {
 			leg1.tag = false;
 			const parent = timeline.create(leg1);
-			parent.moveTo(g.game.width - 100, 260, 3000)
+			parent.call(switchIsTouchable)
+				.moveTo(g.game.width - 100, 260, 3000)
 				.con()
-				.rotateTo(0, 3000)
-				.wait(3000);
+				.rotateTo(0, 3000);
 
-			swichIsTouchable();
-			
-			// generateChild(body.cssColor, leftHorn.height, leg1.scaleX);
+			generateChild(leg1.gene);
 		}
-
-
 
 		// if (leg1.tag === false) {
 		// 	return;
@@ -260,13 +249,10 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	return leg1;
 }
 
-// function generateChild(color: string, horn: number, scale: number) {
-// 	insects[targetNumber].get
-// }
+let insects: insectRect[] = new Array(15);
+let numberingCounter = 0;
 
-export function numberingInsects(): FilledRect[] {
-	let insects: FilledRect[] = new Array(15);
-	let numberingCounter = 0;
+export function numberingInsects(): void {
 
 	for (let colorIdx = 0; colorIdx < 4; colorIdx++) {
 		for (let sizeIdx = 0; sizeIdx < 2; sizeIdx++) {
@@ -277,8 +263,39 @@ export function numberingInsects(): FilledRect[] {
 			}
 		}
 	}
+}
 
-	return insects;
+function generateChild(gene: Array<any>) {
+	const geneA = insects[parentIndex].gene;
+	const geneB = gene;
+
+	let geneticElementIndexA = Math.floor(g.game.random.generate() * geneA.length);
+	let geneticElementIndexB: number;
+
+	do {
+		geneticElementIndexB = Math.floor(g.game.random.generate() * geneB.length);
+	} while (geneticElementIndexB === geneticElementIndexA)
+
+	const newGene: number[] = [null, null, null];
+	newGene[geneticElementIndexA] = geneA[geneticElementIndexA];
+	newGene[geneticElementIndexB] = geneA[geneticElementIndexB];
+
+	if (geneticElementIndexA + geneticElementIndexB === 3) {
+		newGene[0] = Math.floor(g.game.random.generate() * 3);
+	} else if (geneticElementIndexA + geneticElementIndexB === 2) {
+		newGene[1] = Math.floor(g.game.random.generate() * 1);
+	} else if (geneticElementIndexA + geneticElementIndexB === 1) {
+		newGene[2] = Math.floor(g.game.random.generate() * 1);
+	}
+
+	insects[numberingCounter] = createInsect(gameScene, newGene[0], newGene[1], newGene[2]);
+	insects[numberingCounter].x = g.game.width - 100;
+	insects[numberingCounter].y = 420;
+	insects[numberingCounter].tag = false;
+	insects[numberingCounter].angle = 0;
+	gameScene.append(insects[numberingCounter]);
+	numberingCounter++;
+	switchIsTouchable;
 }
 
 export function showDisplay(scene: Scene): void {
@@ -328,30 +345,27 @@ export function showDisplay(scene: Scene): void {
 	scene.append(frame3);
 }
 
-let firstParent: number;
+let parentIndex: number;
 
-export function setGoal(insects: FilledRect[], arrayLength: number): void {
-	const targetNumber = Math.floor(g.game.random.generate() * arrayLength);
-	insects[targetNumber].tag = false;
-	const theGoal = timeline.create(insects[targetNumber]);
+export function setGoal(): void {
+	const targetIndex = Math.floor(g.game.random.generate() * insects.length);
+	insects[targetIndex].tag = false;
+	const theGoal = timeline.create(insects[targetIndex]);
 	theGoal.moveTo(100, 100, 3000)
 		.con()
 		.rotateTo(0, 3000);
 
 	do {
-		firstParent = Math.floor(g.game.random.generate() * arrayLength);
-	} while (firstParent === targetNumber);
+		parentIndex = Math.floor(g.game.random.generate() * insects.length);
+	} while (parentIndex === targetIndex);
 
-	insects[firstParent].tag = false;
-	const theFirst = timeline.create(insects[firstParent]);
-	theFirst.wait(3000) //ほんとは止めたくない
+	insects[parentIndex].tag = false;
+	const theFirst = timeline.create(insects[parentIndex]);
+	theFirst.wait(3000)
 		.moveTo(g.game.width - 100, 100, 3000)
 		.con()
-		.rotateTo(0, 3000);
-
-	// ここにウェイト
-
-	swichIsTouchable();
+		.rotateTo(0, 3000)
+		.call(switchIsTouchable);
 }
 
 export function createGrass(): void {
@@ -443,51 +457,51 @@ function moveInsect(insect: FilledRect, isRotating: boolean, leftRight: number):
 	return [isRotating, leftRight];
 }
 
-export function clearStage(): void {
-	textWindow.destroy();
+// export function clearStage(): void {
+// 	textWindow.destroy();
 
-	const back = new g.FilledRect({
-		scene: gameScene,
-		cssColor: "black",
-		width: 450,
-		height: 100,
-		x: g.game.width / 2,
-		y: g.game.height / 2,
-		anchorX: 0.5,
-		anchorY: 0.5,
-	});
+// 	const back = new g.FilledRect({
+// 		scene: gameScene,
+// 		cssColor: "black",
+// 		width: 450,
+// 		height: 100,
+// 		x: g.game.width / 2,
+// 		y: g.game.height / 2,
+// 		anchorX: 0.5,
+// 		anchorY: 0.5,
+// 	});
 
-	const clearMessage = new g.Label({
-		scene: gameScene,
-		font: font,
-		text: "Complete!!!",
-		fontSize: 50,
-		textColor: "white",
-		x: g.game.width / 2,
-		y: g.game.height / 2,
-		anchorX: 0.5,
-		anchorY: 0.5,
-	});
+// 	const clearMessage = new g.Label({
+// 		scene: gameScene,
+// 		font: font,
+// 		text: "Complete!!!",
+// 		fontSize: 50,
+// 		textColor: "white",
+// 		x: g.game.width / 2,
+// 		y: g.game.height / 2,
+// 		anchorX: 0.5,
+// 		anchorY: 0.5,
+// 	});
 
-	gameScene.append(back);
-	gameScene.append(clearMessage);
-}
+// 	gameScene.append(back);
+// 	gameScene.append(clearMessage);
+// }
 
-export function updateStatus(leg1: FilledRect): void {
-	count--;
+// export function updateStatus(leg1: FilledRect): void {
+// 	count--;
 
-	if (count === 0) {
-		clearStage();
-	} else {
-		counter.text = "Target remaining : " + count;
-		counter.invalidate();
-		leg1.destroy();
-		targetIndex = Math.floor(g.game.random.generate() * 4);
-		targetColor = convenienceColors[targetIndex];
-		mission.text = "Catch any " + targetColor + " insect!!";
-		mission.invalidate();
-	}
-}
+// 	if (count === 0) {
+// 		clearStage();
+// 	} else {
+// 		counter.text = "Target remaining : " + count;
+// 		counter.invalidate();
+// 		leg1.destroy();
+// 		targetIndex = Math.floor(g.game.random.generate() * 4);
+// 		targetColor = convenienceColors[targetIndex];
+// 		mission.text = "Catch any " + targetColor + " insect!!";
+// 		mission.invalidate();
+// 	}
+// }
 
 export function missIndicate(scene: Scene, x: number, y: number): void {
 	const miss = new g.Label({

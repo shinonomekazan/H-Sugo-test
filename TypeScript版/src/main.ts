@@ -21,7 +21,7 @@ function main(): void{
 		system.showDisplay(system.gameScene);
 
 		// 虫生成
-		const insects = system.numberingInsects();
+		system.numberingInsects();
 
 		// 草生成
 		// for (let i = 0; i < 7; i++) {
@@ -31,7 +31,7 @@ function main(): void{
 		// ステータス表示
 		// system.statusDisplay();
 
-		system.setGoal(insects, insects.length);
+		system.setGoal();
 
 	});
 
