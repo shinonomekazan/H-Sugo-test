@@ -93,7 +93,7 @@ export function showRules(openingScene: Scene): void {
 	const rules = new g.Label({
 		scene: openingScene,
 		font: font,
-		text: `ゴーレムの周りに \n冷気が集まっていく……!!`,
+		text: "ゴーレムの周りに \n冷気が集まっていく……!!",
 		fontSize: 20,
 		textColor: "white",
 		x: g.game.width / 2,
@@ -114,13 +114,14 @@ const switchIsTouchable: () => void = () => {
 	} else if (isTouchable === true) {
 		isTouchable = false;
 	}
-}
+};
 
-class insectRect extends g.FilledRect {
+class InsectRect extends g.FilledRect {
 	gene: number[] = new Array(3);
+	number: number;
 }
 
-export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: number, hornSizeIndex: number): insectRect {
+export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: number, hornSizeIndex: number): InsectRect {
 	const direction = [0, 90, 180, 270];
 	const directionIndex = Math.floor(g.game.random.generate() * direction.length);
 	const leg1X = Math.floor(g.game.random.generate() * g.game.width);
@@ -130,7 +131,7 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	let isRotating = false;
 	let leftRight = 0;
 
-	const leg1 = new insectRect({
+	const leg1 = new InsectRect({
 		scene: scene,
 		x: g.game.width / 2,
 		y: 80,
@@ -212,7 +213,7 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	// フラグ管理に使う
 	leg1.tag = true;
 
-	leg1.gene = [colorIndex, hornSizeIndex, bodySizeIndex]
+	leg1.gene = [colorIndex, bodySizeIndex, hornSizeIndex];
 
 	leg1.onUpdate.add(() => {
 		if (leg1.tag !== true) {
@@ -226,13 +227,16 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	body.onPointDown.add(() => {
 		if (isTouchable === true && leg1.tag === true) {
 			leg1.tag = false;
+			parentIndexB = leg1.number;
 			const parent = timeline.create(leg1);
 			parent.call(switchIsTouchable)
 				.moveTo(g.game.width - 100, 260, 3000)
 				.con()
 				.rotateTo(0, 3000);
 
-			generateChild(leg1.gene);
+			scene.setTimeout(() => {
+				generateChild();
+			}, 4500);
 		}
 
 		// if (leg1.tag === false) {
@@ -249,7 +253,7 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 	return leg1;
 }
 
-let insects: insectRect[] = new Array(15);
+let insects: InsectRect[] = new Array(15);
 let numberingCounter = 0;
 
 export function numberingInsects(): void {
@@ -258,6 +262,7 @@ export function numberingInsects(): void {
 		for (let sizeIdx = 0; sizeIdx < 2; sizeIdx++) {
 			for (let hornSizeIdx = 0; hornSizeIdx < 2; hornSizeIdx++) {
 				insects[numberingCounter] = createInsect(gameScene, colorIdx, sizeIdx, hornSizeIdx);
+				insects[numberingCounter].number = numberingCounter;
 				gameScene.append(insects[numberingCounter]);
 				numberingCounter++;
 			}
@@ -265,20 +270,20 @@ export function numberingInsects(): void {
 	}
 }
 
-function generateChild(gene: Array<any>) {
-	const geneA = insects[parentIndex].gene;
-	const geneB = gene;
+function generateChild(): void {
+	const geneA = insects[parentIndexA].gene;
+	const geneB = insects[parentIndexB].gene;
 
 	let geneticElementIndexA = Math.floor(g.game.random.generate() * geneA.length);
 	let geneticElementIndexB: number;
 
 	do {
 		geneticElementIndexB = Math.floor(g.game.random.generate() * geneB.length);
-	} while (geneticElementIndexB === geneticElementIndexA)
+	} while (geneticElementIndexB === geneticElementIndexA);
 
 	const newGene: number[] = [null, null, null];
 	newGene[geneticElementIndexA] = geneA[geneticElementIndexA];
-	newGene[geneticElementIndexB] = geneA[geneticElementIndexB];
+	newGene[geneticElementIndexB] = geneB[geneticElementIndexB];
 
 	if (geneticElementIndexA + geneticElementIndexB === 3) {
 		newGene[0] = Math.floor(g.game.random.generate() * 3);
@@ -294,8 +299,38 @@ function generateChild(gene: Array<any>) {
 	insects[numberingCounter].tag = false;
 	insects[numberingCounter].angle = 0;
 	gameScene.append(insects[numberingCounter]);
-	numberingCounter++;
-	switchIsTouchable;
+	checkClear();
+}
+
+function checkClear(): void {
+	if (insects[targetIndex].gene[0] === insects[numberingCounter].gene[0] &&
+		insects[targetIndex].gene[1] === insects[numberingCounter].gene[1] &&
+		insects[targetIndex].gene[2] === insects[numberingCounter].gene[2]) {
+		clearStage();
+	} else {
+		const parentA = timeline.create(insects[parentIndexA]);
+		const parentB = timeline.create(insects[parentIndexB]);
+		const child = timeline.create(insects[numberingCounter]);
+
+		gameScene.setTimeout(() => {
+			parentA.rotateBy(1800, 1000)
+				.con()
+				.moveBy(Math.floor(g.game.random.generate() * (100 - -100 + 1)) + -100, 600, 1000)
+				.call(insects[parentIndexA].destroy);
+
+			parentB.rotateBy(1800, 1000)
+				.con()
+				.moveBy(Math.floor(g.game.random.generate() * (100 - -100 + 1)) + -100, 600, 1000, tl.Easing.easeOutSine)
+				.call(insects[parentIndexB].destroy);
+
+			child.wait(2000)
+				.moveTo(g.game.width - 100, 100, 1500)
+				.call(switchIsTouchable);
+		}, 2000);
+
+		parentIndexA = numberingCounter;
+		numberingCounter++;
+	}
 }
 
 export function showDisplay(scene: Scene): void {
@@ -307,7 +342,7 @@ export function showDisplay(scene: Scene): void {
 		height: 100 * 1.3,
 		cssColor: "white",
 		anchorX: 0.5,
-	})
+	});
 
 	const frame1 = new g.FilledRect({
 		scene: scene,
@@ -317,7 +352,7 @@ export function showDisplay(scene: Scene): void {
 		height: 100 * 1.3,
 		cssColor: "white",
 		anchorX: 0.5,
-	})
+	});
 
 	const frame2 = new g.FilledRect({
 		scene: scene,
@@ -327,7 +362,7 @@ export function showDisplay(scene: Scene): void {
 		height: 100 * 1.3,
 		cssColor: "white",
 		anchorX: 0.5,
-	})
+	});
 
 	const frame3 = new g.FilledRect({
 		scene: scene,
@@ -337,7 +372,7 @@ export function showDisplay(scene: Scene): void {
 		height: 100 * 1.3,
 		cssColor: "white",
 		anchorX: 0.5,
-	})
+	});
 
 	scene.append(frame0);
 	scene.append(frame1);
@@ -345,10 +380,11 @@ export function showDisplay(scene: Scene): void {
 	scene.append(frame3);
 }
 
-let parentIndex: number;
+let parentIndexA: number;
+let parentIndexB: number;
+const targetIndex = Math.floor(g.game.random.generate() * insects.length);
 
 export function setGoal(): void {
-	const targetIndex = Math.floor(g.game.random.generate() * insects.length);
 	insects[targetIndex].tag = false;
 	const theGoal = timeline.create(insects[targetIndex]);
 	theGoal.moveTo(100, 100, 3000)
@@ -356,50 +392,52 @@ export function setGoal(): void {
 		.rotateTo(0, 3000);
 
 	do {
-		parentIndex = Math.floor(g.game.random.generate() * insects.length);
-	} while (parentIndex === targetIndex);
+		parentIndexA = Math.floor(g.game.random.generate() * insects.length);
+	} while (parentIndexA === targetIndex);
 
-	insects[parentIndex].tag = false;
-	const theFirst = timeline.create(insects[parentIndex]);
-	theFirst.wait(3000)
-		.moveTo(g.game.width - 100, 100, 3000)
-		.con()
-		.rotateTo(0, 3000)
-		.call(switchIsTouchable);
+	gameScene.setTimeout(() => {
+		insects[parentIndexA].tag = false;
+
+		const theFirst = timeline.create(insects[parentIndexA]);
+		theFirst.moveTo(g.game.width - 100, 100, 3000)
+			.con()
+			.rotateTo(0, 3000)
+			.call(switchIsTouchable);
+	}, 3000);
 }
 
-export function createGrass(): void {
-	const grassX = Math.floor(g.game.random.generate() * g.game.width);
-	const grassY = Math.floor(g.game.random.generate() * g.game.height);
+// export function createGrass(): void {
+// 	const grassX = Math.floor(g.game.random.generate() * g.game.width);
+// 	const grassY = Math.floor(g.game.random.generate() * g.game.height);
 
-	const grass = new g.E({ scene: gameScene });
+// 	const grass = new g.E({ scene: gameScene });
 
-	const partA = new g.FilledRect({
-		scene: gameScene,
-		x: grassX,
-		y: grassY,
-		width: 180,
-		height: 90,
-		cssColor: "green",
-		parent: grass,
-		anchorX: 0.5,
-		anchorY: 0.5,
-	});
+// 	const partA = new g.FilledRect({
+// 		scene: gameScene,
+// 		x: grassX,
+// 		y: grassY,
+// 		width: 180,
+// 		height: 90,
+// 		cssColor: "green",
+// 		parent: grass,
+// 		anchorX: 0.5,
+// 		anchorY: 0.5,
+// 	});
 
-	const partB = new g.FilledRect({
-		scene: gameScene,
-		x: grassX,
-		y: grassY,
-		width: 90,
-		height: 180,
-		cssColor: "green",
-		parent: grass,
-		anchorX: 0.5,
-		anchorY: 0.5,
-	});
+// 	const partB = new g.FilledRect({
+// 		scene: gameScene,
+// 		x: grassX,
+// 		y: grassY,
+// 		width: 90,
+// 		height: 180,
+// 		cssColor: "green",
+// 		parent: grass,
+// 		anchorX: 0.5,
+// 		anchorY: 0.5,
+// 	});
 
-	gameScene.append(grass);
-}
+// 	gameScene.append(grass);
+// }
 
 function moveInsect(insect: FilledRect, isRotating: boolean, leftRight: number): [boolean, number] {
 	if (isRotating === false && insect.x > 0 && insect.x < g.game.width && insect.y > 0 && insect.y < g.game.height) {
@@ -457,35 +495,34 @@ function moveInsect(insect: FilledRect, isRotating: boolean, leftRight: number):
 	return [isRotating, leftRight];
 }
 
-// export function clearStage(): void {
-// 	textWindow.destroy();
+export function clearStage(): void {
 
-// 	const back = new g.FilledRect({
-// 		scene: gameScene,
-// 		cssColor: "black",
-// 		width: 450,
-// 		height: 100,
-// 		x: g.game.width / 2,
-// 		y: g.game.height / 2,
-// 		anchorX: 0.5,
-// 		anchorY: 0.5,
-// 	});
+	const back = new g.FilledRect({
+		scene: gameScene,
+		cssColor: "black",
+		width: 450,
+		height: 100,
+		x: g.game.width / 2,
+		y: g.game.height / 2,
+		anchorX: 0.5,
+		anchorY: 0.5,
+	});
 
-// 	const clearMessage = new g.Label({
-// 		scene: gameScene,
-// 		font: font,
-// 		text: "Complete!!!",
-// 		fontSize: 50,
-// 		textColor: "white",
-// 		x: g.game.width / 2,
-// 		y: g.game.height / 2,
-// 		anchorX: 0.5,
-// 		anchorY: 0.5,
-// 	});
+	const clearMessage = new g.Label({
+		scene: gameScene,
+		font: font,
+		text: "Complete!!!",
+		fontSize: 50,
+		textColor: "white",
+		x: g.game.width / 2,
+		y: g.game.height / 2,
+		anchorX: 0.5,
+		anchorY: 0.5,
+	});
 
-// 	gameScene.append(back);
-// 	gameScene.append(clearMessage);
-// }
+	gameScene.append(back);
+	gameScene.append(clearMessage);
+}
 
 // export function updateStatus(leg1: FilledRect): void {
 // 	count--;
