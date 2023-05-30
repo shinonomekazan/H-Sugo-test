@@ -1,7 +1,8 @@
 import { FilledRect, Scene } from "@akashic/akashic-engine";
 import * as tl from "@akashic-extension/akashic-timeline";
+import al = require("@akashic-extension/akashic-label");
 
-export const gameScene = new g.Scene({ game: g.game, assetIds: ["bgm", "成功", "失敗"] });
+export const gameScene = new g.Scene({ game: g.game, assetIds: ["bgm", "成功", "失敗", "touch"] });
 export const openingScene = new g.Scene({ game: g.game });
 
 const timeline = new tl.Timeline(gameScene);
@@ -32,52 +33,68 @@ const font = new g.DynamicFont({
 	size: 30
 });
 
-// let targetIndex = Math.floor(g.game.random.generate() * 4);
-// const convenienceColors = ["blue", "yellow", "red", "glay"];
-// let targetColor = convenienceColors[targetIndex];
-
-// const textWindow = new g.FilledRect({
-// 	scene: gameScene,
-// 	cssColor: "black",
-// 	width: 450,
-// 	height: 100,
-// 	x: 10,
-// 	y: 15,
-// });
-
-// const mission = new g.Label({
-// 	scene: gameScene,
-// 	font: font,
-// 	text: "Catch any " + targetColor + " insect!!",
-// 	fontSize: 30,
-// 	textColor: "white",
-// 	x: 15,
-// 	y: 20,
-// 	anchorY: 0.3,
-// });
-
-// let count = 4;
-
-// const counter = new g.Label({
-// 	scene: gameScene,
-// 	font: font,
-// 	text: "Target remaining : " + count,
-// 	fontSize: 30,
-// 	textColor: "white",
-// 	x: 15,
-// 	y: 70,
-// 	anchorY: 0.5,
-// });
-
-// export function statusDisplay(): FilledRect {
-// 	gameScene.append(textWindow);
-// 	textWindow.append(mission);
-// 	textWindow.append(counter);
-
-// 	return textWindow;
-// }
-
 export function showRules(openingScene: Scene): void {
+	const multiply = new al.Label({
+		scene: openingScene,
+		font: font,
+		text: `*`,
+		fontSize: 50,
+		textColor: "red",
+		x: g.game.width - 92,
+		y: 170,
+		anchorX: 0.5,
+		anchorY: 0.5,
+		width: 50,
+	})
+
+	const arrow = new al.Label({
+		scene: openingScene,
+		font: font,
+		text: `↓`,
+		fontSize: 50,
+		textColor: "red",
+		x: g.game.width - 102,
+		y: 323,
+		anchorX: 0.5,
+		anchorY: 0.5,
+		width: 50,
+	})
+
+	const A = new al.Label({
+		scene: openingScene,
+		font: font,
+		text: `A`,
+		fontSize: 70,
+		textColor: "red",
+		x: g.game.width - 75,
+		y: 50,
+		anchorX: 0.5,
+		width: 100,
+	})
+
+	const B = new al.Label({
+		scene: openingScene,
+		font: font,
+		text: `B`,
+		fontSize: 70,
+		textColor: "red",
+		x: g.game.width - 75,
+		y: 210,
+		anchorX: 0.5,
+		width: 100,
+	})
+
+	const X = new al.Label({
+		scene: openingScene,
+		font: font,
+		text: `X`,
+		fontSize: 70,
+		textColor: "red",
+		x: g.game.width - 75,
+		y: 370,
+		anchorX: 0.5,
+		width: 100,
+	})
 
 	const back = new g.FilledRect({
 		scene: openingScene,
@@ -90,18 +107,37 @@ export function showRules(openingScene: Scene): void {
 		anchorY: 0.5,
 	});
 
-	const rules = new g.Label({
+	const rules = new al.Label({
 		scene: openingScene,
 		font: font,
-		text: "ゴーレムの周りに \n冷気が集まっていく……!!",
+		text: `ムシとムシを交配させて
+目標の形質を持った虫を作ろう！
+\n
+･目標と最初の親Aはランダムに選ばれるぞ		
+･親Aと交配させる親Bをクリックで選ぼう
+･生まれたXはAとBの要素を遺伝しているぞ
+･Xが目標の形質と完全一致ならクリア！
+(完全一致でなければXが次の親Aとなる。
+クリックでまた親Bを選ぼう)
+\n
+ヒント
+遺伝要素は｢ツノの有無｣｢体の色｣｢大きさ｣だ。
+XはAとBからどれかひとつずつを引き継ぐぞ。
+残りひとつはランダムに決まるんだ。`,
 		fontSize: 20,
 		textColor: "white",
 		x: g.game.width / 2,
 		y: g.game.height / 2,
 		anchorX: 0.5,
 		anchorY: 0.5,
+		width: 430,
 	});
 
+	openingScene.append(A);
+	openingScene.append(B);
+	openingScene.append(X);
+	openingScene.append(multiply);
+	openingScene.append(arrow);
 	openingScene.append(back);
 	openingScene.append(rules);
 }
@@ -226,6 +262,7 @@ export function createInsect(scene: Scene, colorIndex: number, bodySizeIndex: nu
 
 	body.onPointDown.add(() => {
 		if (isTouchable === true && leg1.tag === true) {
+			(scene.assets["失敗"] as g.AudioAsset).play();
 			leg1.tag = false;
 			parentIndexB = leg1.number;
 			const parent = timeline.create(leg1);
@@ -380,11 +417,39 @@ export function showDisplay(scene: Scene): void {
 	scene.append(frame3);
 }
 
+function announce(text: string): void {
+
+	(gameScene.assets["touch"] as g.AudioAsset).play();
+
+	const message = new al.Label({
+		scene: gameScene,
+		font: font,
+		text: text,
+		fontSize: 50,
+		textColor: "yellow",
+		x: g.game.width / 2,
+		y: g.game.height / 2,
+		anchorX: 0.5,
+		anchorY: 0.5,
+		width: g.game.width,
+	});
+
+	gameScene.setTimeout(() => {
+		gameScene.append(message);
+
+		gameScene.setTimeout(() => {
+			message.destroy();
+		}, 2800);
+	}, 200);
+}
+
 let parentIndexA: number;
 let parentIndexB: number;
 const targetIndex = Math.floor(g.game.random.generate() * insects.length);
 
 export function setGoal(): void {
+	announce("目標決定");
+
 	insects[targetIndex].tag = false;
 	const theGoal = timeline.create(insects[targetIndex]);
 	theGoal.moveTo(100, 100, 3000)
@@ -508,7 +573,7 @@ export function clearStage(): void {
 		anchorY: 0.5,
 	});
 
-	const clearMessage = new g.Label({
+	const clearMessage = new al.Label({
 		scene: gameScene,
 		font: font,
 		text: "Complete!!!",
@@ -518,10 +583,12 @@ export function clearStage(): void {
 		y: g.game.height / 2,
 		anchorX: 0.5,
 		anchorY: 0.5,
+		width: 500,
 	});
 
 	gameScene.append(back);
 	gameScene.append(clearMessage);
+	(gameScene.assets["成功"] as g.AudioAsset).play();
 }
 
 // export function updateStatus(leg1: FilledRect): void {
@@ -540,20 +607,20 @@ export function clearStage(): void {
 // 	}
 // }
 
-export function missIndicate(scene: Scene, x: number, y: number): void {
-	const miss = new g.Label({
-		scene: scene,
-		font: font,
-		text: "miss",
-		fontSize: 30,
-		textColor: "red",
-		x: x,
-		y: y,
-	});
+// export function missIndicate(scene: Scene, x: number, y: number): void {
+// 	const miss = new g.Label({
+// 		scene: scene,
+// 		font: font,
+// 		text: "miss",
+// 		fontSize: 30,
+// 		textColor: "red",
+// 		x: x,
+// 		y: y,
+// 	});
 
-	scene.setTimeout(() => {
-		miss.destroy();
-	}, 1000);
+// 	scene.setTimeout(() => {
+// 		miss.destroy();
+// 	}, 1000);
 
-	scene.append(miss);
-}
+// 	scene.append(miss);
+// }
