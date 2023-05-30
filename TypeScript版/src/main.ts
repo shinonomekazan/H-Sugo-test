@@ -1,8 +1,8 @@
 import * as system from "./systems";
 
-function main(): void{
+function main(): void {
 	system.openingScene.onLoad.add(() => {
-		system.openingScene.append(system.ground0);
+		system.createGround(system.openingScene);
 		system.showDisplay(system.openingScene);
 		system.showRules(system.openingScene);
 		system.openingScene.onPointDownCapture.add(() => {
@@ -13,24 +13,19 @@ function main(): void{
 	g.game.pushScene(system.openingScene);
 
 	system.gameScene.onLoad.add(() => {
+		//音量調整
 		system.bgmConfig();
 
-		// 地面生成
-		system.gameScene.append(system.ground1);
+		//地面生成
+		system.createGround(system.gameScene);
 
-		system.showDisplay(system.gameScene);
-
-		// 虫生成
+		//虫生成
 		system.numberingInsects();
 
-		// 草生成
-		// for (let i = 0; i < 7; i++) {
-		// 	system.createGrass();
-		// }
+		//ディスプレイ表示
+		system.showDisplay(system.gameScene);
 
-		// ステータス表示
-		// system.statusDisplay();
-
+		//目標の形質と最初の親の設定
 		system.setGoal();
 
 	});
