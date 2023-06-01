@@ -1,4 +1,5 @@
 node_modules
-script
+/script
+/game
 coverage
 game.zip
