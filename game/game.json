@@ -1,0 +1,95 @@
+{
+  "width": 1024,
+  "height": 512,
+  "fps": 30,
+  "main": "./script/aez_bundle_main.js",
+  "assets": {
+    "bgm": {
+      "type": "audio",
+      "path": "files/6e6ed82de3ca7cdfa409",
+      "systemId": "music",
+      "duration": 166906,
+      "hint": {
+        "extensions": [
+          ".aac",
+          ".ogg"
+        ]
+      },
+      "virtualPath": "audio/bgm"
+    },
+    "失敗": {
+      "type": "audio",
+      "path": "files/7c9233e3a96633be1613",
+      "systemId": "sound",
+      "duration": 1025,
+      "hint": {
+        "extensions": [
+          ".aac",
+          ".ogg"
+        ]
+      },
+      "virtualPath": "audio/失敗"
+    },
+    "成功": {
+      "type": "audio",
+      "path": "files/e890ba1b45df581f3629",
+      "systemId": "sound",
+      "duration": 837,
+      "hint": {
+        "extensions": [
+          ".aac",
+          ".ogg"
+        ]
+      },
+      "virtualPath": "audio/成功"
+    },
+    "touch": {
+      "type": "audio",
+      "path": "files/c33f12a938b29c8a21f9",
+      "systemId": "sound",
+      "duration": 413,
+      "hint": {
+        "extensions": [
+          ".aac",
+          ".ogg"
+        ]
+      },
+      "virtualPath": "audio/touch"
+    },
+    "aez_bundle_main": {
+      "type": "script",
+      "global": true,
+      "path": "files/f086925699839f7a9594.js",
+      "virtualPath": "script/aez_bundle_main.js"
+    }
+  },
+  "moduleMainScripts": {
+    "@akashic-extension/akashic-timeline": "node_modules/@akashic-extension/akashic-timeline/lib/index.js",
+    "@akashic-extension/akashic-label": "node_modules/@akashic-extension/akashic-label/lib/index.js"
+  },
+  "environment": {
+    "sandbox-runtime": "3",
+    "external": {
+      "send": "0"
+    },
+    "akashic-runtime": {
+      "version": "~3.6.0-0",
+      "flavor": "-canvas"
+    }
+  },
+  "globalScripts": [],
+  "exportZipInfo": {
+    "version": "1.8.13",
+    "option": {
+      "force": true,
+      "strip": true,
+      "minify": false,
+      "minifyJs": false,
+      "minifyJson": false,
+      "packImage": false,
+      "bundle": true,
+      "babel": true,
+      "targetService": "nicolive"
+    }
+  }
+}
